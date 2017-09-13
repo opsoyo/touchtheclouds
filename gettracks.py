@@ -6,14 +6,6 @@ import json
 import youtube_dl
 import sys
 
-headers = {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
-}
-
-request_stagger = 1.0
-
-bdomain = 'https://soundcloud.com'
-
 class ydl_logger(object):
     def debug(self, msg):
         pass
@@ -42,6 +34,7 @@ for char in data:
             'format': 'best',
             'outtmpl': 'soundcloud/{}/%(webpage_url_basename)s/%(title)s.%(id)s.%(ext)s'.format(profile),
             'continuedl': True,
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
             'writeinfojson': True,
             'restrictfilenames': False,
             'nooverwrites': True,
