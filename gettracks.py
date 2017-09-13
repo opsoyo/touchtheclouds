@@ -22,11 +22,7 @@ class ydl_logger(object):
         pass
 
     def error(self, msg):
-        exit()
-        if msg == 'axel exited with code 1':
-            pass
-        else:
-            print(msg)
+        print(msg)
 
 def ydl_hook(d):
     if d['status'] == 'finished':
@@ -37,7 +33,6 @@ with open('profiles.json') as data_file:
 
 for char in data:
     for profile in data[char]:
-        #print('Working Profile: {}'.format(profile))
         sys.stdout.write("\x1b]2;Working Profile: {}\x07".format(profile))
         ydl_opts = {
             'quiet': False,
