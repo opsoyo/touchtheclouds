@@ -51,7 +51,7 @@ with open('profiles.json') as data_file:
                 #'dump_pages': True,
                 #'call_home': True,
                 'external_downloader': 'aria2c',
-                'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M'],
+                'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M','-m','10'],
                 'logger': ydl_logger(),
                 'progress_hooks': [ydl_hook],
             }
