@@ -25,13 +25,11 @@ with open('profiles.json') as data_file:
 
     for char in data:
         for profile in data[char]:
-            #print('Working profile: {}'.format(profile))
             sys.stdout.write("\x1b]2;Working Profile: {}\x07".format(profile))
             ydl_opts = {
-                #'consoletitle': 'Working Profile: %(uploader)s',
                 'quiet': False,
                 'no_warnings': False,
-                'ignoreerrors': True, # Seemingly random profiles get a 404, and can't get JSON file; not sure why.
+                'ignoreerrors': True,
                 'verbose': False,
                 'simulate': False,
                 'continuedl': True,
