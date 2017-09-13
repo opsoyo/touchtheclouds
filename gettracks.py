@@ -31,7 +31,7 @@ with open('profiles.json') as data_file:
                 #'consoletitle': 'Working Profile: %(uploader)s',
                 'quiet': False,
                 'no_warnings': False,
-                'ignoreerrors': False,
+                'ignoreerrors': True, # Seemingly random profiles get a 404, and can't get JSON file; not sure why.
                 'verbose': False,
                 'simulate': False,
                 'continuedl': True,
