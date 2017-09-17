@@ -70,6 +70,7 @@ with open('profiles.json') as data_file:
                     results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
             except youtube_dl.utils.DownloadError:
                 # Internet is unreachable? Loop until it's good to go!
+                # Might give false positives...
                 while True:
                     if is_connected('https://google.com') == True:
                         break
