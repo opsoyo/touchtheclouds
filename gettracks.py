@@ -5,6 +5,7 @@ import time
 import json
 import youtube_dl
 import sys
+import socket
 
 class ydl_logger(object):
     def debug(self, msg):
@@ -20,16 +21,27 @@ def ydl_hook(d):
     if d['status'] == 'finished':
         print('\r\n*****\r\nYTDL>> Download complete...{}\r\n*****'.format(d['filename']))
 
+def is_connected(host):
+    try:
+      # Connect to host? Reachablity.
+      s = socket.create_connection((host,443),2)
+      return True
+    except OSError:
+      pass
+    return False
+
 with open('profiles.json') as data_file:
     data = json.load(data_file)
 
     for char in data:
         for profile in data[char]:
+            #print('Working profile: {}'.format(profile))
             sys.stdout.write("\x1b]2;Working Profile: {}\x07".format(profile))
             ydl_opts = {
+                #'consoletitle': 'Working Profile: %(uploader)s',
                 'quiet': False,
                 'no_warnings': False,
-                'ignoreerrors': True,
+                'ignoreerrors': False,
                 'verbose': False,
                 'simulate': False,
                 'continuedl': True,
@@ -49,10 +61,19 @@ with open('profiles.json') as data_file:
                 #'dump_pages': True,
                 #'call_home': True,
                 'external_downloader': 'aria2c',
-                'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M','-m','10'],
+                'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M','--max-tries','10'],
                 'logger': ydl_logger(),
                 'progress_hooks': [ydl_hook],
             }
-
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
+            except youtube_dl.utils.DownloadError:
+                # Expotential backoff until router recovers; either Internet is down, or router is malo.
+                while True:
+                    if is_connected('https://google.com') == True:
+                        break
+                    else:
+                        epoch = int(time.time())
+                        print("\r\n*****\r\nNetwork Error ({}): No Internet. Waiting to recheck.\r\n*****\r\n".format(epoch))
+                    time.sleep(2)
