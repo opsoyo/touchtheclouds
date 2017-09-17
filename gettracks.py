@@ -7,6 +7,20 @@ import youtube_dl
 import sys
 import socket
 
+def is_connected(host="8.8.8.8", port=53):
+        """
+        Host: 8.8.8.8 (google-public-dns-a.google.com)
+        OpenPort: 53/tcp
+        Service: domain (DNS/TCP)
+        """
+        try:
+            socket.setdefaulttimeout(1)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except Exception as ex:
+            pass
+        return False
+
 class ydl_logger(object):
     def debug(self, msg):
         pass
@@ -16,20 +30,30 @@ class ydl_logger(object):
 
     def error(self, msg):
         print(msg)
+        if 'ssl' in msg:
+            # Network error, check for Internet in loop
+            while True:
+                if is_connected('https://google.com') == True:
+                    break
+                else:
+                    epoch = int(time.time())
+                    print("\r\n*****\r\nNetwork Error ({}): No Internet. Waiting to recheck.\r\n*****\r\n".format(epoch))
+                    time.sleep(2)
+        elif '404' in msg:
+            pass
 
 def ydl_hook(d):
     if d['status'] == 'finished':
         print('\r\n*****\r\nYTDL>> Download complete...{}\r\n*****'.format(d['filename']))
 
-def is_connected(host):
-    try:
-      # Connect to host? Reachablity.
-      s = socket.create_connection((host,443),2)
-      return True
-    except OSError:
-      pass
-    return False
+"""
+Search for .aria2c temp files to complete
+and reprocess that user in attempt to finish.
+Remove temp file if not possible
+"""
+# ...
 
+# Read from JSON and find a random profile
 with open('profiles.json') as data_file:
     data = json.load(data_file)
 
@@ -65,16 +89,6 @@ with open('profiles.json') as data_file:
                 'logger': ydl_logger(),
                 'progress_hooks': [ydl_hook],
             }
-            try:
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                    results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
-            except youtube_dl.utils.DownloadError:
-                # Internet is unreachable? Loop until it's good to go!
-                # Might give false positives...
-                while True:
-                    if is_connected('https://google.com') == True:
-                        break
-                    else:
-                        epoch = int(time.time())
-                        print("\r\n*****\r\nNetwork Error ({}): No Internet. Waiting to recheck.\r\n*****\r\n".format(epoch))
-                    time.sleep(2)
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
+                
