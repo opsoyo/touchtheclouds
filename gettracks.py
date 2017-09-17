@@ -65,7 +65,7 @@ with open('profiles.json') as data_file:
                 #'consoletitle': 'Working Profile: %(uploader)s',
                 'quiet': False,
                 'no_warnings': False,
-                'ignoreerrors': False,
+                'ignoreerrors': True, # So that it doesn't stop on random 404s
                 'verbose': False,
                 'simulate': False,
                 'continuedl': True,
