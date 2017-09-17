@@ -69,7 +69,7 @@ with open('profiles.json') as data_file:
                 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                     results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
             except youtube_dl.utils.DownloadError:
-                # Expotential backoff until router recovers; either Internet is down, or router is malo.
+                # Internet is unreachable? Loop until it's good to go!
                 while True:
                     if is_connected('https://google.com') == True:
                         break
