@@ -29,18 +29,23 @@ class ydl_logger(object):
         pass
 
     def error(self, msg):
-        print(msg)
         if 'ssl' in msg:
             # Network error, check for Internet in loop
             while True:
-                if is_connected('https://google.com') == True:
+                is_conn = is_connected('https://google.com')
+                if is_conn == True:
                     break
                 else:
                     epoch = int(time.time())
                     print("\r\n*****\r\nNetwork Error ({}): No Internet. Waiting to recheck.\r\n*****\r\n".format(epoch))
+                    print('Error result: {}'.format(is_conn))
                     time.sleep(2)
+        elif 'No space left on device':
+            print('\r\n*****\r\nYeah??: {}\r\n*****'.format(msg))
         elif '404' in msg:
             pass
+        else:
+            print(msg)
 
 def ydl_hook(d):
     if d['status'] == 'finished':
@@ -57,38 +62,39 @@ Remove temp file if not possible
 with open('profiles.json') as data_file:
     data = json.load(data_file)
 
-    for char in data:
-        for profile in data[char]:
-            #print('Working profile: {}'.format(profile))
-            sys.stdout.write("\x1b]2;Working Profile: {}\x07".format(profile))
-            ydl_opts = {
-                #'consoletitle': 'Working Profile: %(uploader)s',
-                'quiet': False,
-                'no_warnings': False,
-                'ignoreerrors': True, # So that it doesn't stop on random 404s
-                'verbose': False,
-                'simulate': False,
-                'continuedl': True,
-                'restrictfilenames': True,
-                'nooverwrites': True,
-                'format': 'best',
-                'outtmpl': 'soundcloud/%(uploader)s/%(webpage_url_basename)s/%(title)s.%(id)s/%(title)s.%(id)s.%(ext)s',
-                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
-                'writeinfojson': True,
-                'writedescription': True,
-                'write_all_thumbnails': True,
-                'nocheckcertificate': False,
-                'prefer_insecure': False,
-                'socket_timeout': '600',
-                'retries': 10,
-                #'debug_printtraffic': True,
-                #'dump_pages': True,
-                #'call_home': True,
-                'external_downloader': 'aria2c',
-                'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M','--max-tries','10'],
-                'logger': ydl_logger(),
-                'progress_hooks': [ydl_hook],
-            }
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                results = ydl.download(['https://soundcloud.com/{}'.format(profile)])
-                
+for char in data:
+    for profile in data[char]:
+        profile = 'quarion'
+        print('Working profile: {}'.format(profile))
+        #sys.stdout.write("\x1b]2;Working Profile: {}\x07".format(profile))
+        ydl_opts = {
+            #'consoletitle': 'Working Profile: %(uploader)s',
+            'quiet': False,
+            'no_warnings': False,
+            'ignoreerrors': True, # So that it doesn't stop on random 404s
+            'verbose': False,
+            'simulate': False,
+            'continuedl': True,
+            'restrictfilenames': True,
+            'nooverwrites': True,
+            'format': 'all',
+            'outtmpl': 'soundcloud/{}/%(uploader)s/%(webpage_url_basename)s/%(title)s.%(id)s/%(title)s.%(id)s.%(ext)s'.format(profile), # Designed to account for artist name's changing with the same username, and the same for the songs by using the IDs as part of the dirs and filenames.
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
+            'writeinfojson': True,
+            'writedescription': True,
+            'write_all_thumbnails': True,
+            'nocheckcertificate': False,
+            'prefer_insecure': False,
+            'socket_timeout': '600',
+            'retries': 10,
+            #'debug_printtraffic': True,
+            #'dump_pages': True,
+            #'call_home': True,
+            'download_archive': 'downloaded.log',
+            'external_downloader': 'aria2c',
+            'external_downloader_args': ['-c','-j','3','-x','3','-s','3','-k','1M','--max-tries','10'],
+            'logger': ydl_logger(),
+            'progress_hooks': [ydl_hook],
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            results = ydl.download(['https://soundcloud.com/{}/tracks'.format(profile)])
